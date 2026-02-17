@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <string.h>
+#include <sys/utsname.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 2026
+
+#define RED     "\033[1;31m"
+#define GREEN   "\033[1;32m"
+#define YELLOW  "\033[1;33m"
+#define BLUE    "\033[1;34m"
+#define CYAN    "\033[1;36m"
+#define RESET   "\033[0m"
+
+void user() {
+    char hostname[256]; 
+
+    if (gethostname(hostname, sizeof(hostname)) == 0) {
+        printf("User        "RED":"RESET" %s\n", hostname);
+    }
+}
+
+void kernel() {
+    struct utsname sys;
+    uname(&sys);
+    printf("Kernel      "RED":"RESET" %s\n", sys.release);
+}
+
+void getos() {
+    char buffer[BUFFER_SIZE];
+    FILE *file = fopen("/etc/os-release", "r");
+    if(!file) printf("failed to open file/n");
+
+    fgets(buffer, sizeof(buffer), file);
+
+    char name[1024];
+    float version;
+
+    sscanf(buffer, "PRETTY_NAME=\"%s %f LTS", name, &version);
+
+    printf("OS          "RED":"RESET" %s %.2f\n", name, version);
+    fclose(file);
+}
+
+void cpu() {
+    char buffer[BUFFER_SIZE];
+    char terget[] = "model name";
+    FILE *file = fopen("/proc/cpuinfo", "r");
+    if(!file) printf("failed to open file\n");
+
+    while (fgets(buffer, sizeof(buffer), file))
+    {
+        if (strstr(buffer, terget))
+        {
+
+            char *ptr = strchr(buffer, ':');
+            if (ptr != NULL) {
+                ptr++; 
+                while (*ptr == ' ') ptr++;
+                printf("CPU         "RED":"RESET" %s", ptr);
+            }
+            break;
+        }
+        
+    }
+
+    fclose(file);
+}
+
+void mem() {
+    FILE *file = fopen("/proc/meminfo", "r");
+    if (!file) printf("failed to open file\n");
+    char buffer[BUFFER_SIZE];
+    char usemem[BUFFER_SIZE];
+
+    fgets(buffer, sizeof(buffer), file);
+    buffer[strcspn(buffer, "\n")] = 0;
+
+    int availablemem;
+    while (fgets(usemem, sizeof(usemem), file))
+    {
+        if (strstr (usemem, "MemAvailable"))
+        {
+            sscanf(usemem, "MemAvailable:    %d kB", &availablemem);
+            break;
+        }
+    }
+    
+
+    int mem;
+    sscanf(buffer, "%*s %d", &mem);
+
+    int totalgb = (mem/1000) / 1000;
+
+    int used = mem - availablemem;
+
+    float usedgb = (used/1000.0) / 1000.0;
+
+    printf("RAM         "RED":"RESET" %.1fGB/%dGB\n",usedgb, totalgb);
+
+
+    fclose(file);
+}
+
+
+void uptime() {
+    FILE *file = fopen("/proc/uptime", "r");
+    if (!file) printf("failed to open file\n");
+
+    char buffer[BUFFER_SIZE];
+    fscanf(file, "%s", buffer);
+    float second = atof(buffer);
+    
+    float totalmin = second / 60;
+    int hour = totalmin / 60;
+    float gap = hour * 60;
+    int minute = totalmin - gap;
+
+
+    printf("Uptime      "RED":"RESET" %d hours %d mins\n", hour, minute);
+
+    fclose(file);
+}
+
+int main() {
+    printf(BLUE "=========== " RESET);
+    printf(CYAN "System Lens" RESET);
+    printf(BLUE " ===========\n" RESET);
+
+        getos();
+        kernel();
+        cpu();
+        mem();
+        uptime();
+        user();
+
+    printf(BLUE"===================================\n"RESET);
+    return 0;
+}
