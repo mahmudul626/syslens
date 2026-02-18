@@ -14,10 +14,10 @@
 #define RESET   "\033[0m"
 
 void user() {
-    char hostname[256]; 
-
-    if (gethostname(hostname, sizeof(hostname)) == 0) {
-        printf("User        "RED":"RESET" %s\n", hostname);
+    char *ptr;
+    ptr = getenv("USER");
+    if (ptr != NULL) {
+        printf("User        "RED":"RESET" %s\n", ptr);
     }
 }
 
@@ -97,7 +97,19 @@ void mem() {
 
     float usedgb = (used/1000.0) / 1000.0;
 
-    printf("RAM         "RED":"RESET" %.1fGB/%dGB\n",usedgb, totalgb);
+    int percent = (usedgb/(float)totalgb) * 100;
+
+    char *color = GREEN;
+
+    if (percent >= 80) {
+        color = RED;
+    } else if (percent >= 50) {
+        color = YELLOW;
+    } else {
+        color = GREEN;
+    }
+    
+    printf("RAM         "RED":"RESET" %.1fGB/%dGB %s(%d%%)"RESET"\n",usedgb, totalgb, color, percent);
 
 
     fclose(file);
