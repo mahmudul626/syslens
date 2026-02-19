@@ -29,17 +29,46 @@ void kernel() {
 
 void getos() {
     char buffer[BUFFER_SIZE];
+    int name_found = 0, version_found = 0;
+    
     FILE *file = fopen("/etc/os-release", "r");
-    if(!file) printf("failed to open file/n");
+    if(!file) return;
 
-    fgets(buffer, sizeof(buffer), file);
+    char name[1024] = "unknown";
+    char version[1024] = "0";
 
-    char name[1024];
-    float version;
+    while (fgets(buffer, sizeof(buffer), file))
+    {
+        if (strncmp(buffer, "NAME=", 5) == 0)
+        {
+            int offset = 5;
+            if (buffer[5] == '"')
+            {
+                offset = 6;
+            }
+            
+            strcpy(name, buffer+offset);
+            name[strcspn(name, "\"\n")] = 0;
+            name_found = 1;
+        }
+        
+        if (strncmp(buffer, "VERSION_ID=", 11) == 0)
+        {
+            int offset = 11;
+            if (buffer[11] == '"')
+            {
+                offset = 12;
+            }
 
-    sscanf(buffer, "PRETTY_NAME=\"%s %f LTS", name, &version);
+            strcpy(version, buffer+offset);
+            version[strcspn(version, "\"\n")] = 0;
+            version_found = 1;
+        } 
+        
+        if(name_found == 1 && version_found == 1) break;
+    }
 
-    printf("OS          "RED":"RESET" %s %.2f\n", name, version);
+    printf("OS          "RED":"RESET" %s %s\n", name, version);
     fclose(file);
 }
 
@@ -129,8 +158,12 @@ void uptime() {
     float gap = hour * 60;
     int minute = totalmin - gap;
 
+    if(hour > 0) {
+        printf("Uptime      "RED":"RESET" %d hours %d mins\n", hour, minute);
+    } else {
+        printf("Uptime      "RED":"RESET" %d mins\n", minute);
+    }
 
-    printf("Uptime      "RED":"RESET" %d hours %d mins\n", hour, minute);
 
     fclose(file);
 }
