@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #define BUFFER_SIZE 2026
+#define MAX_BAR 20
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
@@ -12,6 +13,28 @@
 #define BLUE    "\033[1;34m"
 #define CYAN    "\033[1;36m"
 #define RESET   "\033[0m"
+
+void print_bar(int length, const char *color) {
+
+    if (length < 0)
+        length = 0;
+    if (length > MAX_BAR)
+        length = MAX_BAR;
+
+    printf("%s[", color);
+
+    for (int i = 0; i < length; i++) {
+        printf("#");
+    }
+
+    for (int i = length; i < MAX_BAR; i++) {
+        printf(".");
+    }
+
+    printf("]%s", RESET);
+}
+
+
 
 void user() {
     char *ptr;
@@ -144,7 +167,13 @@ void mem() {
         color = GREEN;
     }
     
-    printf("RAM         "RED":"RESET" %.1fGiB/%.1fGiB %s(%d%%)"RESET"\n",usedgb, totalgb, color, percent);
+    // printf("RAM         "RED":"RESET" %.1fGiB/%.1fGiB %s(%d%%)"RESET"\n",usedgb, totalgb, color, percent);
+    printf("RAM         "RED":"RESET" %.1fGiB/%.1fGiB ",usedgb, totalgb);
+    int bar = (percent * MAX_BAR) / 100;
+    print_bar(bar, color);
+    printf("%s %d%%"RESET"\n",color, percent);
+
+
 
 }
 
