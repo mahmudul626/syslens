@@ -76,7 +76,7 @@ void cpu() {
     char buffer[BUFFER_SIZE];
     char terget[] = "model name";
     FILE *file = fopen("/proc/cpuinfo", "r");
-    if(!file) printf("failed to open file\n");
+    if(!file) return;
 
     while (fgets(buffer, sizeof(buffer), file))
     {
@@ -87,7 +87,8 @@ void cpu() {
             if (ptr != NULL) {
                 ptr++; 
                 while (*ptr == ' ') ptr++;
-                printf("CPU         "RED":"RESET" %s", ptr);
+                ptr[strcspn(ptr, "\r\n")] = 0;
+                printf("CPU         "RED":"RESET" %s\n", ptr);
             }
             break;
         }
@@ -98,35 +99,40 @@ void cpu() {
 }
 
 void mem() {
+
     FILE *file = fopen("/proc/meminfo", "r");
-    if (!file) printf("failed to open file\n");
+    if (!file) return;
+
     char buffer[BUFFER_SIZE];
-    char usemem[BUFFER_SIZE];
+    unsigned long availablemem = 0, mem = 0;
+    int mem_found = 0, availablemem_found = 0;
 
-    fgets(buffer, sizeof(buffer), file);
-    buffer[strcspn(buffer, "\n")] = 0;
 
-    int availablemem;
-    while (fgets(usemem, sizeof(usemem), file))
+    while (fgets(buffer, sizeof(buffer), file))
     {
-        if (strstr (usemem, "MemAvailable"))
+        if (strncmp(buffer, "MemTotal:", 9) == 0)
         {
-            sscanf(usemem, "MemAvailable:    %d kB", &availablemem);
-            break;
+            sscanf(buffer, "%*s %ld", &mem);
+            mem_found = 1;
+        } else if (strncmp(buffer, "MemAvailable:", 13) == 0)
+        {
+            sscanf(buffer, "%*s %ld", &availablemem);
+            availablemem_found = 1;
         }
+        
+        if(mem_found == 1 && availablemem_found == 1) break;
     }
     
+    fclose(file);
+    
+    double totalgb = (double)mem / (1024.0 * 1024.0);
 
-    int mem;
-    sscanf(buffer, "%*s %d", &mem);
+    double used = (double)mem - availablemem;
 
-    int totalgb = (mem/1000) / 1000;
+    double usedgb = used/(1024.0 * 1024.0);
+    
+    int percent = (mem>0) ? (int)((used/(double)mem) * 100) : 0;
 
-    int used = mem - availablemem;
-
-    float usedgb = (used/1000.0) / 1000.0;
-
-    int percent = (usedgb/(float)totalgb) * 100;
 
     char *color = GREEN;
 
@@ -138,16 +144,14 @@ void mem() {
         color = GREEN;
     }
     
-    printf("RAM         "RED":"RESET" %.1fGB/%dGB %s(%d%%)"RESET"\n",usedgb, totalgb, color, percent);
+    printf("RAM         "RED":"RESET" %.1fGiB/%.1fGiB %s(%d%%)"RESET"\n",usedgb, totalgb, color, percent);
 
-
-    fclose(file);
 }
 
 
 void uptime() {
     FILE *file = fopen("/proc/uptime", "r");
-    if (!file) printf("failed to open file\n");
+    if (!file) return;
 
     char buffer[BUFFER_SIZE];
     fscanf(file, "%s", buffer);
