@@ -20,6 +20,9 @@ int main () {
     char path[6024] = "/proc/";
 
 
+    printf("Process         Pid\n");
+    printf("=====================\n");
+
     while ((a = readdir(d)) != NULL)
     {
        if(strcmp(a->d_name, "1") == 0) {
@@ -74,20 +77,38 @@ int main () {
                 if (strncmp(state, "R (running)", 11) == 0)
                 {
                     runing++;
-                    printf("Proc : %s | pid : %s\n", name, pid);
+                    printf("%s              %s\n", name, pid);
                 }
-             
+             fclose(file);
 
             }
             
-
         break;
        }
 
 
     }
+    closedir(d);
 
-printf("\nTotal task : %d  | running : %d | sleeping : %d\n", task, runing, task - runing);
+    FILE *load = fopen("/proc/loadavg", "r");
+    if (!load)
+    {
+        perror("load file");
+        return 0;
+    }
+
+    char buffur[1014];
+    fgets(buffur, sizeof(buffur), load);
+
+    char str1[100], str2[100], str3[100];
+    sscanf(buffur, "%s %s %s", str1, str2, str3);
+
+    printf("\nLoad avg : %s, %s, %s\n", str1, str2,str3);
+
+    fclose(load);
+    
+
+    printf("Total task : %d  | running : %d | sleeping : %d\n", task, runing, task - runing);
 
     return 0;
 }
