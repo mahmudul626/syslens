@@ -3,7 +3,68 @@
 #include <string.h>
 #include <dirent.h>
 
+void meminfo() {
+    FILE *file = fopen("/proc/meminfo", "r");
+    if (!file) return;
 
+    char buffer[2034];
+    double memtotal = 0, memfree = 0, membuffer = 0, cached = 0, used = 0, memavailable = 0, swaptotal = 0, swapfree =0;
+    int found = 0;
+
+    while (fgets(buffer, sizeof(buffer), file) != NULL)
+    {
+        if (strncmp(buffer, "MemTotal:", 9) == 0)
+        {
+            sscanf(buffer, "MemTotal: %le", &memtotal);
+            found ++;
+        }
+
+        if (strncmp(buffer, "MemFree:", 8) == 0)
+        {
+            sscanf(buffer, "MemFree: %le", &memfree);
+            found++;
+        }
+
+        if(strncmp(buffer, "MemAvailable:", 13) == 0) {
+            sscanf(buffer, "MemAvailable: %le", &memavailable);
+            found++;
+        }
+
+        if (strncmp(buffer, "Buffers:", 8) == 0)
+        {
+            sscanf(buffer, "Buffers: %le", &membuffer);
+            found++;
+        }
+
+        if (strncmp(buffer, "Cached:", 7) == 0)
+        {
+            sscanf(buffer, "Cached: %le", &cached);
+            found++;
+        }
+        
+        if (strncmp(buffer, "SwapTotal:", 10) == 0)
+        {
+            sscanf(buffer, "SwapTotal: %le", &swaptotal);
+            found++;
+        }
+
+        if (strncmp(buffer, "SwapFree:", 9) == 0)
+        {
+            sscanf(buffer, "SwapFree: %le", &swapfree);
+            found++;
+        }
+        
+
+        
+        if(found == 7) break;
+    }
+
+    double cachandbuf = membuffer+cached;
+    used = memtotal-(cachandbuf+memfree);
+
+    printf("Mem total : %.1f MiB    |   free : %.1f MiB    |   used : %.1f    |    cached\\buffer : %.1f\n", memtotal/1024, memfree/1024,  used/1024.0, cachandbuf/1024.0);
+    printf("Swap total : %.1f MiB   |   free : %.1f MiB    |   used : %.1f    |    mem avl : %.1f\n", swaptotal/1024, swapfree/1024, 0.0, memavailable/1024);
+}
 
 int main () {
     
@@ -15,7 +76,6 @@ int main () {
 
     struct dirent *a, *c;
     int task = 0;
-    int sleeping = 0;
     int runing = 0;
     char path[6024] = "/proc/";
 
@@ -94,7 +154,7 @@ int main () {
     if (!load)
     {
         perror("load file");
-        return 0;
+        return 1;
     }
 
     char buffur[1014];
@@ -109,6 +169,8 @@ int main () {
     
 
     printf("Total task : %d  | running : %d | sleeping : %d\n", task, runing, task - runing);
+
+    meminfo();
 
     return 0;
 }
