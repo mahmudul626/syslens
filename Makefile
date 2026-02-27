@@ -2,7 +2,7 @@ CC = gcc
 
 CFLAGS = -Iinclude
 
-SRCS = main.c
+SRCS = src/main.c src/proc.c
 
 TARGET = syslens
 
