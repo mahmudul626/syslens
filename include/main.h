@@ -5,15 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-
-#include <stdio.h>
-#include <string.h>
 #include <sys/utsname.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 
-#define BUFFER_SIZE 2026
+#define BUFFER_SIZE 2024
 #define MAX_BAR 10
+#define VERSION "1.0.0"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
@@ -24,5 +22,13 @@
 
 
 void proc();
+void print_bar(int length, const char *color);
+void mem();
+void load_avg();
+void uptime();
+void cpu();
+void getos();
+void kernel();
+void user();
 
 #endif

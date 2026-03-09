@@ -1,0 +1,140 @@
+#include "../include/main.h"
+
+void print_bar(int length, const char *color) {
+
+    if (length < 0)
+        length = 0;
+    if (length > MAX_BAR)
+        length = MAX_BAR;
+
+    printf("%s[", color);
+
+    for (int i = 0; i < length; i++) {
+        printf("#");
+    }
+
+    for (int i = length; i < MAX_BAR; i++) {
+        printf(".");
+    }
+
+    printf("]%s", RESET);
+}
+
+
+
+
+void mem() {
+
+    FILE *file = fopen("/proc/meminfo", "r");
+    if (!file) return;
+
+    char buffer[BUFFER_SIZE];
+    unsigned long availablemem = 0, mem = 0;
+    double swaptotal = 0, swapfree = 0;
+    int found = 0;
+
+
+    while (fgets(buffer, sizeof(buffer), file))
+    {
+        if (strncmp(buffer, "MemTotal:", 9) == 0)
+        {
+            sscanf(buffer, "%*s %ld", &mem);
+            found++;
+        }
+        
+        if (strncmp(buffer, "MemAvailable:", 13) == 0)
+        {
+            sscanf(buffer, "%*s %ld", &availablemem);
+            found++;
+        }
+
+        if (strncmp(buffer, "SwapTotal:", 10) == 0)
+        {
+            sscanf(buffer, "SwapTotal: %le", &swaptotal);
+            found++;
+        }
+
+        if (strncmp(buffer, "SwapFree:", 9) == 0)
+        {
+            sscanf(buffer, "SwapFree: %le", &swapfree);
+            found++;
+        }
+        
+        if(found == 4) break;
+    }
+    
+    fclose(file);
+
+    /*---------Ram section-----------*/
+    
+    double totalgb = (double)mem / (1024.0 * 1024.0);
+
+    double used = (double)mem - availablemem;
+
+    double usedgb = used/(1024.0 * 1024.0);
+    
+    int percent = (mem>0) ? (int)((used/(double)mem) * 100) : 0;
+
+
+    char *color = GREEN;
+
+    if (percent >= 80) {
+        color = RED;
+    } else if (percent >= 50) {
+        color = YELLOW;
+    } else {
+        color = GREEN;
+    }
+    
+    printf("RAM         "RED":"RESET" ");
+    int bar = (percent * MAX_BAR) / 100;
+    print_bar(bar, color);
+    printf("%s %d%%"RESET" ",color, percent);
+    printf("(%.1fGiB/%.1fGiB) \n",usedgb, totalgb);
+
+
+    /*---------swap section----------*/
+
+    double swaptotalgb = swaptotal/(1024.0 * 1024.0);
+    double swapused = (swaptotal-swapfree);
+    double swapusedgb = swapused/(1024.0 * 1024.0);
+    int swappersent = (swaptotal>0) ? (int)(swapused* 100.0) / swaptotal : 0;
+
+
+    char *swapcolor = GREEN;
+
+    if (swappersent >= 80) {
+        swapcolor = RED;
+    } else if (swappersent >= 50) {
+        swapcolor = YELLOW;
+    } else {
+        swapcolor = GREEN;
+    }
+
+    int swapbar = (swappersent * MAX_BAR) / 100;
+    printf("Swap        "RED":"RESET" ");
+    print_bar(swapbar, swapcolor);
+    printf("%s %d%%"RESET" ",swapcolor, swappersent);
+    printf("(%.1fGiB/%.1fGiB)\n", swapusedgb, swaptotalgb);
+
+}
+
+
+
+void load_avg() {
+    FILE *load = fopen("/proc/loadavg", "r");
+    if (!load)
+    {
+        return;
+    }
+
+    char buffur[1014];
+    fgets(buffur, sizeof(buffur), load);
+
+    char str1[100], str2[100], str3[100];
+    sscanf(buffur, "%s %s %s", str1, str2, str3);
+
+    printf("Load avg    "RED":"RESET" %s, %s, %s\n", str1, str2,str3);
+
+    fclose(load);
+}
