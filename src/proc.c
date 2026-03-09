@@ -4,85 +4,65 @@ void proc() {
     
     DIR *d = opendir("/proc");
     if(!d) {
-        perror("file:");
+        perror("dir:");
         return;
     }
 
-    struct dirent *a, *c;
+    struct dirent *a;
     int task = 0;
-    int runing = 0;
-    char path[6024] = "/proc/";
-
+    int running = 0;
+    int sleeping = 0;
+    int zombie = 0;
 
     while ((a = readdir(d)) != NULL)
     {
-       if(strcmp(a->d_name, "1") == 0) {
+       if(isdigit(a->d_name[0])) {
 
-            while ((c = readdir(d)) != NULL)
-            {
-                char path[6024] = "/proc/";
-                task++;
-                strcat(path, c->d_name);
-                strcat(path, "/status");
+                char path[512];
+                snprintf(path, sizeof(path), "/proc/%s/status", a->d_name);
 
                 FILE *file = fopen(path, "r");
                 if (!file)
                 {
-                    perror("file:");
-                    return;
+                    continue;
                 }
 
-                char buffer[2024];
-                char state[1012];
-                char name[1013];
-                char pid[1010];
-                int found = 0;
+                char buffer[256];
+                char state[64] = {0};
 
                 while (fgets(buffer, sizeof(buffer), file) != NULL)
                 {
-                    if (strncmp(buffer, "Name:", 5) == 0)
-                    {
-                        strcpy(name, buffer+6);
-                        name[strcspn(name, "\n")] = 0;
-                        found++;
-                    } 
-                    
                     if (strncmp(buffer, "State:", 6) == 0)
                     {
-                        strcpy(state, buffer+7);
-                        state[strcspn(state, "\n")] = 0;
-                        found ++;
+                        strncpy(state, buffer+7, sizeof(state) - 1);
+                        state[sizeof(state) - 1] = '\0';
+                        break;
                     }
-
-                    if (strncmp(buffer, "Pid:", 4) == 0)
-                    {
-                        strcpy(pid, buffer+5);
-                        pid[strcspn(pid, "\n")] = 0;
-                        found ++;
-                    }
-                    
-                    if(found == 3) break;
-                    
                 }
 
                 if (strncmp(state, "R (running)", 11) == 0)
                 {
-                    runing++;
-                    printf("%s              %s\n", name, pid);
+                    running++;
+                } else if (strncmp(state, "S (sleeping)", 12) == 0 || strncmp(state, "I (idle)", 8) == 0)
+                {
+                    sleeping++;
+                } else if (strncmp(state, "Z (zombie)", 10) == 0)
+                {
+                    zombie++;
                 }
+                
+
              fclose(file);
 
-            }
-            
-        break;
        }
 
 
     }
     closedir(d);
     
+    task = running+sleeping+zombie;
 
-    printf("Task        "RED":"RESET" %d total  | %d running | %d sleeping\n", task, runing, task - runing);
+    printf("Task        "RED":"RESET" %d total  | %d running | %d sleeping | %d zombie\n", task, running, sleeping, zombie);
 
 
 }
