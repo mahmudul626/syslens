@@ -11,7 +11,7 @@
 
 #define BUFFER_SIZE 2024
 #define MAX_BAR 10
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"

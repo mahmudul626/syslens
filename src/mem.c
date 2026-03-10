@@ -1,4 +1,5 @@
 #include "../include/main.h"
+#include <sys/statvfs.h>
 
 void print_bar(int length, const char *color) {
 
@@ -117,6 +118,42 @@ void mem() {
     printf("%s %d%%"RESET" ",swapcolor, swappersent);
     printf("(%.1fGiB/%.1fGiB)\n", swapusedgb, swaptotalgb);
 
+
+    /*----------disk-------------*/
+    
+        struct statvfs vfs;
+
+        if (statvfs("/", &vfs) == 0) {
+
+            unsigned long long block_size = vfs.f_frsize;
+            
+            unsigned long long total = vfs.f_blocks * block_size;
+            
+            unsigned long long free = vfs.f_bfree * block_size;
+            
+            unsigned long long used = total - free;
+
+            double disktotal_gib = (double)total / (1024 * 1024 * 1024);
+            double diskused_gib = (double)used / (1024 * 1024 * 1024);
+            int diskpercentage = (used * 100) / total;
+
+            char *diskcolor = GREEN;
+
+            if (diskpercentage >= 80) {
+                diskcolor = RED;
+            } else if (diskpercentage >= 50) {
+                diskcolor = YELLOW;
+            } else {
+                diskcolor = GREEN;
+            }
+
+            int diskbar = (diskpercentage * MAX_BAR) / 100;
+            printf("Disk        "RED":"RESET" ");
+            print_bar(diskbar, diskcolor);
+            printf("%s %d%%"RESET" ",diskcolor, diskpercentage);
+            printf("(%.1fGiB/%.1fGiB)\n", diskused_gib, disktotal_gib);
+        }
+ 
 }
 
 
