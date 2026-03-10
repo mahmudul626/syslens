@@ -124,7 +124,6 @@ void mem() {
         struct statvfs vfs;
 
         if (statvfs("/", &vfs) == 0) {
-
             unsigned long long block_size = vfs.f_frsize;
             
             unsigned long long total = vfs.f_blocks * block_size;
