@@ -10,6 +10,7 @@ void print_all() {
         cpu();
         uptime();
         user();
+        power();
 
         printf("\n");
 
