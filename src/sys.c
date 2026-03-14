@@ -168,3 +168,30 @@ void power() {
     printf("Model       "RED":"RESET" %s %s %s\n", model_name, serial_number, manufacturer);
     
 }
+
+void shell() {
+    FILE *file = fopen("/proc/self/status", "r");
+    if(!file) return;
+
+    char buffer[1024];
+    while (fgets(buffer, sizeof(buffer), file) != NULL)
+    {
+        if (strncmp(buffer, "PPid", 4) == 0)
+        {
+            buffer[strcspn(buffer, "\n")] = 0;
+            snprintf(buffer, sizeof(buffer), "/proc/%s/comm", buffer+6);
+            char shell_name[64];
+            FILE *shell_file = fopen(buffer, "r");
+            if(!shell_file) return;
+            // fgets(shell_name, sizeof(shell_name), shell_file);
+            fscanf(shell_file, "%s", shell_name);
+            fclose (shell_file);
+            printf("Shell       "RED":"RESET" %s\n", shell_name);
+            break;
+        }
+        
+    }
+
+    fclose(file);
+    
+}

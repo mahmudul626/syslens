@@ -11,7 +11,7 @@
 
 #define BUFFER_SIZE 2024
 #define MAX_BAR 10
-#define VERSION "1.0.2"
+#define VERSION "1.0.3"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
@@ -31,5 +31,6 @@ void cpu();
 void getos();
 void kernel();
 void user();
+void shell();
 
 #endif

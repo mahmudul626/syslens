@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro: [ubuntu:22.04, debian:bookworm, fedora:latest]
+        compiler: [gcc, clang]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build & test on ${{ matrix.distro }} with ${{ matrix.compiler }}
+        run: |
+          docker run --rm -v "${{ github.workspace }}":/src -w /src "${{ matrix.distro }}" bash -lc '
+            set -e
+
+            if grep -q -E "(ubuntu|debian)" /etc/os-release; then
+              apt-get update -y
+              apt-get install -y build-essential valgrind
+              if [ "${{ matrix.compiler }}" = "clang" ]; then
+                apt-get install -y clang
+              fi
+            else
+              dnf -y install make valgrind
+              if [ "${{ matrix.compiler }}" = "gcc" ]; then
+                dnf -y install gcc
+              else
+                dnf -y install clang
+              fi
+            fi
+
+            export CC=${{ matrix.compiler }}
+            export CFLAGS="-Iinclude -g -Wall -Wextra -Werror"
+
+            make clean
+            make
+
+            ./syslens --version
+            ./syslens --help
+
+            # Run a small valgrind smoke-test (fails on leaks or invalid access)
+            valgrind --leak-check=full --error-exitcode=1 ./syslens --version
+          '
