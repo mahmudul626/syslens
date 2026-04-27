@@ -6,18 +6,22 @@ void print_all() {
     printf("[ System Info ]\n");
 
         getos();
+        product_name();
         kernel();
         cpu();
+        gpu();
+        temp();
         uptime();
         user();
         shell();
+        usb();
         power();
 
         printf("\n");
 
     printf("[ Resource Usage ]\n");
-
         mem();
+        cpu_per();
         load_avg();
 
         printf("\n");
@@ -40,11 +44,18 @@ int main(int argc, char *argv[]) {
         if (strcmp(argv[1], "-s") == 0)
         {
             printf("[ System Info ]\n");
+            
             getos();
+            product_name();
             kernel();
             cpu();
+            gpu();
+            temp();
             uptime();
             user();
+            shell();
+            usb();
+            power();
         }
         else if (strcmp(argv[1], "-m") == 0)
         {

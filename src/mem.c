@@ -1,6 +1,8 @@
 #include "../include/main.h"
 #include <sys/statvfs.h>
 
+unsigned long totalram = 1;
+
 void print_bar(int length, const char *color) {
 
     if (length < 0)
@@ -67,7 +69,7 @@ void mem() {
     fclose(file);
 
     /*---------Ram section-----------*/
-    
+    totalram = mem;
     double totalgb = (double)mem / (1024.0 * 1024.0);
 
     double used = (double)mem - availablemem;
@@ -173,4 +175,57 @@ void load_avg() {
     printf("Load avg    "RED":"RESET" %s, %s, %s\n", str1, str2,str3);
 
     fclose(load);
+}
+
+void cpu_per() {
+    FILE *file = fopen("/proc/stat", "r");
+    if(!file) return;
+
+    char buffer[512];
+    fgets(buffer, sizeof(buffer), file);
+
+    int user,nice,system,idle,iowait,irq,softirq;
+
+    sscanf(buffer, "cpu %d %d %d %d %d %d %d", &user, &nice, &system, &idle, &iowait, &irq, &softirq);
+
+    int total_1st = user+nice+system+idle+iowait+irq+softirq;
+    int idle_1st = idle+iowait;
+    fclose(file);
+
+    usleep(100000);
+
+    FILE *file1 = fopen("/proc/stat", "r");
+    if(!file1) return;
+
+    char buffer1[512];
+    fgets(buffer1, sizeof(buffer1), file1);
+
+    int user1,nice1,system1,idle1,iowait1,irq1,softirq1;
+
+    sscanf(buffer1, "cpu %d %d %d %d %d %d %d", &user1, &nice1, &system1, &idle1, &iowait1, &irq1, &softirq1);
+
+    int total_2nd = user1+nice1+system1+idle1+iowait1+irq1+softirq1;
+    int idle_2nd = idle1+iowait1;
+    fclose(file1);
+
+    int delta_total = total_2nd - total_1st;
+    int delta_idle = idle_2nd - idle_1st;
+
+    float cpu = (1.0 - (float)delta_idle / delta_total) * 100;
+    int cpubar = (cpu * MAX_BAR) / 100;
+
+    char *cpucolor;
+    if (cpu < 50)
+    {
+        cpucolor = GREEN;
+    } else if (cpu < 90)
+    {
+        cpucolor = YELLOW;
+    } else {
+        cpucolor = RED;
+    }
+
+    printf("CPU         "RED":"RESET" ");
+    print_bar(cpubar, cpucolor);
+    printf(" %s%.0f%%"RESET"\n", cpucolor, cpu);
 }

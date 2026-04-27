@@ -12,6 +12,7 @@
 #define BUFFER_SIZE 2024
 #define MAX_BAR 10
 #define VERSION "1.0.3"
+extern unsigned long totalram;
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
@@ -28,9 +29,14 @@ void load_avg();
 void uptime();
 void power();
 void cpu();
+void gpu();
 void getos();
 void kernel();
 void user();
 void shell();
+void product_name();
+void temp();
+void usb();
+void cpu_per();
 
 #endif

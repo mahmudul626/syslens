@@ -4,14 +4,24 @@ void user() {
     char *ptr;
     ptr = getenv("USER");
     if (ptr != NULL) {
-        printf("User "RED":"RESET" %s\n", ptr);
+
+        FILE *file = fopen("/etc/hostname", "r");
+        if(!file) return;
+
+        char hostname[64];
+        fgets(hostname, sizeof(hostname), file);
+        hostname[strcspn(hostname, "\n")] = 0;
+
+
+        printf("User@Host   "RED":"RESET" %s@%s\n", ptr, hostname);
+        fclose(file);
     }
 }
 
 void kernel() {
     struct utsname sys;
     uname(&sys);
-    printf("Kernel "RED":"RESET" %s\n", sys.release);
+    printf("Kernel      "RED":"RESET" %s\n", sys.release);
 }
 
 void getos() {
@@ -55,7 +65,7 @@ void getos() {
         if(name_found == 1 && version_found == 1) break;
     }
 
-    printf("OS          "RED":"RESET" %s %s | ", name, version);
+    printf("OS          "RED":"RESET" %s %s\n", name, version);
     fclose(file);
 }
 
@@ -102,11 +112,10 @@ void uptime() {
     int minute = totalmin - gap;
 
     if(hour > 0) {
-        printf("Uptime      "RED":"RESET" %d hours %d mins| ", hour, minute);
+        printf("Uptime      "RED":"RESET" %d hours %d mins\n", hour, minute);
     } else {
-        printf("Uptime      "RED":"RESET" %d mins      | ", minute);
+        printf("Uptime      "RED":"RESET" %d mins\n", minute);
     }
-
 
     fclose(file);
 }
@@ -163,8 +172,28 @@ void power() {
     fscanf(file6, "%s", manufacturer);
     fclose(file6);
 
+    FILE *file7 = fopen("/sys/class/power_supply/BAT0/charge_full", "r");
+    if (!file7) return;
 
-    printf("Power       "RED":"RESET" %s%% (%s) %s %s\n", capacity, status, technology, type);
+    int charge_full = 0;
+    char charge_capasity[120];
+    fscanf(file7, "%s", charge_capasity);
+    charge_full = atoi(charge_capasity);
+    fclose(file7);
+
+    FILE *file8 = fopen("/sys/class/power_supply/BAT0/charge_full_design", "r");
+    if (!file8) return;
+
+    int charge_full_design = 0;
+    char charge_capasity_design[120];
+    fscanf(file8, "%s", charge_capasity_design);
+    charge_full_design = atoi(charge_capasity_design);
+    fclose(file8);
+
+    int health = (charge_full * 100) / charge_full_design;
+
+    printf("Power       "RED":"RESET" %s%%"RESET" (%s) %s %s\n", capacity, status, technology, type);
+    printf("Health      "RED":"RESET" %d%%\n", health);
     printf("Model       "RED":"RESET" %s %s %s\n", model_name, serial_number, manufacturer);
     
 }
@@ -183,7 +212,6 @@ void shell() {
             char shell_name[64];
             FILE *shell_file = fopen(buffer, "r");
             if(!shell_file) return;
-            // fgets(shell_name, sizeof(shell_name), shell_file);
             fscanf(shell_file, "%s", shell_name);
             fclose (shell_file);
             printf("Shell       "RED":"RESET" %s\n", shell_name);
@@ -194,4 +222,96 @@ void shell() {
 
     fclose(file);
     
+}
+
+void product_name() {
+    FILE *file = fopen("/sys/devices/virtual/dmi/id/product_name", "r");
+    if(!file) return;
+
+    char name[512];
+    fgets(name, sizeof(name), file);
+    name[strcspn(name, "\n")] = 0;
+    fclose(file);
+    printf("Host        "RED":"RESET" %s\n", name);
+}
+
+void temp() {
+
+    int mcls = 0;
+    FILE *file = fopen("/sys/class/hwmon/hwmon4/temp1_input", "r");
+    if(!file) return;
+
+    fscanf(file, "%d", &mcls);
+    fclose(file);
+
+    int c = mcls / 1000;
+    printf("Temp        "RED":"RESET" %d°C\n", c);
+}
+
+void gpu() {
+
+    FILE *file = fopen("/sys/class/drm/card1/device/vendor", "r");
+    if(!file) return;
+    char vendor[64];
+    fscanf(file, "%s", vendor);
+    char gpu[64];
+    if (strcmp(vendor, "0x8086") == 0)
+    {
+        strcpy(gpu, "Intel");
+    } else if (strcmp(vendor, "0x10de") == 0)
+    {
+        strcpy(gpu, "NVIDIA");
+    } else if (strcmp(vendor, "0x1002") == 0)
+    {
+        strcpy(gpu, "AMD");
+    } else {
+        strcpy(gpu, "unknown");
+    }
+    
+    printf("GPU         "RED":"RESET" %s\n", gpu);
+
+    fclose(file);
+    
+}
+
+void usb() {
+    DIR *d = opendir("/sys/bus/usb/devices/");
+    if(!d) return;
+
+    struct dirent *a;
+
+    while ((a = readdir(d)) != NULL)
+    {
+        if (isdigit(a->d_name[0]))
+        {
+            char path[512];
+            snprintf(path, sizeof(path), "/sys/bus/usb/devices/%s/removable", a->d_name);
+
+            FILE *file = fopen(path, "r");
+            if(!file) {
+                continue;
+            }
+
+            char attachment[64];
+            fscanf(file, "%s", attachment);
+
+            if (strcmp(attachment, "removable") == 0)
+            {
+                char name_path[512];
+                snprintf(name_path, sizeof(name_path), "/sys/bus/usb/devices/%s/product", a->d_name);
+
+                FILE *name_file = fopen(name_path, "r");
+                if(!name_file) continue;
+
+                char product_name[64];
+                fgets(product_name, sizeof(product_name), name_file);
+                product_name[strcspn(product_name, "\n")] = 0;
+                printf("USB         "RED":"RESET" %s\n", product_name);
+                fclose(name_file);
+            }
+            fclose(file);
+         }
+        
+    }
+    closedir(d);
 }
