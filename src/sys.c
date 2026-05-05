@@ -192,7 +192,15 @@ void power() {
 
     int health = (charge_full * 100) / charge_full_design;
 
-    printf("Power       "RED":"RESET" %s%%"RESET" (%s) %s %s\n", capacity, status, technology, type);
+    printf("Power       "RED":"RESET" ");
+    if(atoi(capacity) < 30) {
+	    printf(""RED"%s%%"RESET"", capacity);
+    } else if(atoi(capacity) < 45) {
+	    printf(""YELLOW"%s%%"RESET"", capacity);
+    } else {
+    	    printf("%s%%", capacity);
+    }
+    printf(" (%s) %s %s\n", status, technology, type);
     printf("Health      "RED":"RESET" %d%%\n", health);
     printf("Model       "RED":"RESET" %s %s %s\n", model_name, serial_number, manufacturer);
     
