@@ -287,6 +287,7 @@ void usb() {
     if(!d) return;
 
     struct dirent *a;
+    int count = 0;
 
     while ((a = readdir(d)) != NULL)
     {
@@ -305,8 +306,12 @@ void usb() {
 
             if (strcmp(attachment, "removable") == 0)
             {
+		if(count == 0) {
+			printf("USB         "RED":"RESET" ");
+		}
                 char name_path[512];
                 snprintf(name_path, sizeof(name_path), "/sys/bus/usb/devices/%s/product", a->d_name);
+		count++;
 
                 FILE *name_file = fopen(name_path, "r");
                 if(!name_file) continue;
@@ -314,12 +319,17 @@ void usb() {
                 char product_name[64];
                 fgets(product_name, sizeof(product_name), name_file);
                 product_name[strcspn(product_name, "\n")] = 0;
-                printf("USB         "RED":"RESET" %s\n", product_name);
+		if(count > 1) {
+			printf("| %s", product_name);
+		} else {
+                	printf("%s ", product_name);
+		}
                 fclose(name_file);
             }
             fclose(file);
          }
         
     }
+    if(count > 0) printf("\n");
     closedir(d);
 }
