@@ -135,35 +135,63 @@ void proc() {
         
     }
 
-    printf("\n[ Top 5 Processes ]");
+    printf("\n[ Top Processes ]");
     printf("\n-------------------------------------------------------------------------\n");
     printf("%-10s %-10s %-15s %-10s %-10s %-10s\n", "PID", "PPID", "STATUS", "RES", "%MEM", "COMMAND");
     printf("-------------------------------------------------------------------------\n");
 
-    for(int i = 0; i < 5; i++)
-    {
-        if (strncmp(plist[i].state, "Z (zombie)", 10) == 0) {
+    if(task <= 5) {
+	    for(int i = 0; i < task; i++) {
+        	if (strncmp(plist[i].state, "Z (zombie)", 10) == 0) {
 
-            float pmem = ((float)plist[i].vmrss / totalram) * 100;
+            		float pmem = ((float)plist[i].vmrss / totalram) * 100;
 
-            printf(RED"%-10s %-10s %-15s %-10d %-10.1f %-10s\n"RESET,
-                plist[i].pid,
-                plist[i].ppid,
-                plist[i].state,
-                plist[i].vmrss,
-                pmem,
-                plist[i].name);
-        } else {
+            		printf(RED"%-10s %-10s %-15s %-10d %-10.1f %-10s\n"RESET,
+                		plist[i].pid,
+                		plist[i].ppid,
+                		plist[i].state,
+                		plist[i].vmrss,
+                		pmem,
+                		plist[i].name);
+        	} else {
 
-            float pmem = ((float)plist[i].vmrss / totalram) * 100;
+            		float pmem = ((float)plist[i].vmrss / totalram) * 100;
 
-            printf("%-10s %-10s %-15s %-10d %-10.1f %-10s\n",
-                plist[i].pid,
-                plist[i].ppid,
-                plist[i].state,
-                plist[i].vmrss,
-                pmem,
-                plist[i].name);
-        }
-    }
+            		printf("%-10s %-10s %-15s %-10d %-10.1f %-10s\n",
+                		plist[i].pid,
+                		plist[i].ppid,
+                		plist[i].state,
+                		plist[i].vmrss,
+                		pmem,
+                		plist[i].name);
+        		}
+    	   }
+    } else {
+
+    	   for(int i = 0; i < 5; i++) {
+        	if (strncmp(plist[i].state, "Z (zombie)", 10) == 0) {
+
+            	float pmem = ((float)plist[i].vmrss / totalram) * 100;
+
+            	printf(RED"%-10s %-10s %-15s %-10d %-10.1f %-10s\n"RESET,
+                	plist[i].pid,
+                	plist[i].ppid,
+                	plist[i].state,
+                	plist[i].vmrss,
+                	pmem,
+                	plist[i].name);
+        	} else {
+
+            	float pmem = ((float)plist[i].vmrss / totalram) * 100;
+
+           	printf("%-10s %-10s %-15s %-10d %-10.1f %-10s\n",
+                	plist[i].pid,
+                	plist[i].ppid,
+                	plist[i].state,
+                	plist[i].vmrss,
+                	pmem,
+                	plist[i].name);
+        	}
+    	}	
+     }
 }
