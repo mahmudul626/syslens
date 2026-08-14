@@ -4,6 +4,7 @@
 [![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)]()
 [![GitHub stars](https://img.shields.io/github/stars/mahmudul626/syslens.svg)](https://github.com/mahmudul626/syslens/stargazers)
 
+> *"It might have a messy codebase, but it does its job flawlessly. If it works for me, I think you'll find it useful too!"*
 
 SysLens is a lightweight, terminal-based system information utility written in C. It leverages Linux's virtual filesystems and system files to produce a real-time snapshot of system health, hardware specifications, and resource usage.
 
