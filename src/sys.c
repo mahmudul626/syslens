@@ -203,7 +203,52 @@ void power() {
     printf(" (%s) %s %s\n", status, technology, type);
     printf("Health      "RED":"RESET" %d%%\n", health);
     printf("Model       "RED":"RESET" %s %s %s\n", model_name, serial_number, manufacturer);
+
+    //charge full time and remining time predict
     
+    FILE *file9 = fopen("/sys/class/power_supply/BAT0/charge_now", "r");
+    if (!file9) return;
+
+    int charge_now = 0;
+    char charge_now_str[120];
+    fscanf(file9, "%s", charge_now_str);
+    charge_now = atoi(charge_now_str);
+
+    fclose(file9);
+
+    FILE *file10 = fopen("/sys/class/power_supply/BAT0/current_now", "r");
+    if (!file10) return;
+    
+    int current_now = 0;
+    char current_now_str[120];
+    fscanf(file10, "%s", current_now_str);
+    current_now = atoi(current_now_str);
+
+    fclose(file10);
+
+    if (current_now <= 0) return;
+    
+    int rem_charge = charge_full - charge_now;
+    float rem_time = ((float)rem_charge/ current_now) * 60;
+    float backup = ((float)charge_now / current_now) * 60;
+
+    //until charge full
+    
+    int rem_total_time = (int)rem_time;
+    int rem_hour = rem_total_time / 60;
+    int rem_min = rem_total_time % 60;
+
+    //remain charge
+
+    int backup_time = (int)backup;
+    int backup_hour = backup_time / 60;
+    int backup_min = backup_time % 60;
+
+    if(strcmp(status, "Charging") == 0) {
+	    printf("Until full  "RED":"RESET" %dh %dm\n", rem_hour, rem_min);
+    } else if(strcmp(status, "Discharging") == 0) {
+	    printf("Remain 	    "RED":"RESET" %dh %dm\n", backup_hour, backup_min);
+    }
 }
 
 void shell() {
@@ -333,3 +378,4 @@ void usb() {
     if(count > 0) printf("\n");
     closedir(d);
 }
+
