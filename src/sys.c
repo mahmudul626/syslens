@@ -18,21 +18,21 @@ void user() {
     }
 }
 
-void kernel() {
+void kernel(struct sysinfo *buf) {
     struct utsname sys;
     uname(&sys);
-    printf("Kernel      "RED":"RESET" %s\n", sys.release);
+    snprintf(buf->kernel, sizeof(buf->kernel), "%s", sys.release);
 }
 
-void getos() {
+void getos(struct sysinfo *buf) {
     char buffer[BUFFER_SIZE];
     int name_found = 0, version_found = 0;
     
     FILE *file = fopen("/etc/os-release", "r");
     if(!file) return;
 
-    char name[1024] = "unknown";
-    char version[1024] = "0";
+    char name[32] = "unknown";
+    char version[32] = "0";
 
     while (fgets(buffer, sizeof(buffer), file))
     {
@@ -65,7 +65,7 @@ void getos() {
         if(name_found == 1 && version_found == 1) break;
     }
 
-    printf("OS          "RED":"RESET" %s %s\n", name, version);
+    snprintf(buf->os_name, sizeof(buf->os_name), "%s %s", name, version);
     fclose(file);
 }
 

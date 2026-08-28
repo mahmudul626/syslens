@@ -10,6 +10,7 @@
 #include <ctype.h>
 
 #define BUFFER_SIZE 2024
+#define OS_NAME_MAX 64
 #define MAX_BAR 10
 #define VERSION "1.0.3"
 extern unsigned long totalram;
@@ -21,6 +22,10 @@ extern unsigned long totalram;
 #define CYAN    "\033[1;36m"
 #define RESET   "\033[0m"
 
+struct sysinfo {
+	char os_name[OS_NAME_MAX];
+	char kernel[80];
+};
 
 void proc();
 void print_bar(int length, const char *color);
@@ -30,8 +35,8 @@ void uptime();
 void power();
 void cpu();
 void gpu();
-void getos();
-void kernel();
+void getos(struct sysinfo *buf);
+void kernel(struct sysinfo *buf);
 void user();
 void shell();
 void product_name();
