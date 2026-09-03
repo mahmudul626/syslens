@@ -23,8 +23,11 @@ extern unsigned long totalram;
 #define RESET   "\033[0m"
 
 struct sysinfo {
-	char os_name[OS_NAME_MAX];
-	char kernel[80];
+	char *os_name;
+	char *kernel;
+	char *shell;
+	char *user;
+	char *product;
 };
 
 void proc();

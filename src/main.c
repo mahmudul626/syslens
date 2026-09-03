@@ -9,38 +9,116 @@
 #define FETCH_KEY       "\033[38;5;39m"                      
 #define FETCH_VAL       "\033[38;5;255m"
 
-int main() {
+void print_ui() {
     struct sysinfo get;
     getos(&get);
     kernel(&get);
 
     printf("\n");
 
-    printf("  " HTOP_TEXT "Mem" BOLD "[" HTOP_BAR "|||||||||||               " RESET HTOP_TEXT "3.21G/15.8G" BOLD "]" RESET);
-    printf("      " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL "%s\n", "OS:", get.os_name);
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL " %s", "OS\t :", get.os_name);
+    
+    printf("\t\t" HTOP_TEXT "Ram  " RESET);
+    print_bar(5, HTOP_BAR);
+    printf(HTOP_BAR " 50%%" RESET HTOP_TEXT" (3.6GiB/7.6GiB)\n" RESET);
 
-    printf("  " HTOP_TEXT "Swp" BOLD "[" HTOP_BAR "||                        " RESET HTOP_TEXT "512M/8.00G" BOLD "]" RESET);
-    printf("       " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL "%s\n", "Kernel:", get.kernel);
 
-    char task_buffer[50];
-    snprintf(task_buffer, sizeof(task_buffer), "Tasks: 142, 1 running");
-    printf("  " HTOP_TEXT "%-43s" RESET, task_buffer);
-    printf("     " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL "10 hours, 24 mins\n", "Uptime:");
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL " %s", "Kernel :", get.kernel);
+    
+    printf("\t" HTOP_TEXT "Swp  " RESET);
+    print_bar(2, HTOP_BAR);
+    printf(HTOP_BAR " 20%%" RESET HTOP_TEXT" (0.0GiB/2.0GiB)\n" RESET);
 
+
+
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL " 10 hours, 24 mins", "Uptime :");
+    
+    printf("\t" HTOP_TEXT "Disk " RESET);
+    print_bar(7, HTOP_BAR);
+    printf(HTOP_BAR " 70%%" RESET HTOP_TEXT" (3.6GiB/7.6GiB)\n" RESET);
+
+
+
+    printf("  " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL " bash 5.2.21", "Shell  :");
+    
+    printf("\t\t" HTOP_TEXT "Cpu  " RESET);
+    print_bar(1, HTOP_BAR);
+    printf(HTOP_BAR " 10%% " RESET HTOP_TEXT"(40°C)\n" RESET);
+
+
+
+
+
+    printf("  " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL "mahmudul@Mahmudul", "User   : ");
+    
+    
+    
+    
     char load_buffer[50];
-    snprintf(load_buffer, sizeof(load_buffer), "Load average: 0.45 0.61 0.55");
-    printf("  " HTOP_TEXT "%-43s" RESET, load_buffer);
-    printf("     " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL "bash 5.2.21\n", "Shell:");
+    snprintf(load_buffer, sizeof(load_buffer), "Load average: 0.45 0.61 0.55\n");
+    printf("\t" HTOP_TEXT "%s" RESET, load_buffer);
+
+
+
+
+
+
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "93%% (34m to full)", "Bat\t : ");
+    
+    
+    char task_buffer[50];
+    snprintf(task_buffer, sizeof(task_buffer), "Tasks: 142, 1 R, 141 S, 0 Z\n");
+    printf("\t" HTOP_TEXT "%s" RESET, task_buffer);
+    
+    
+    
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "i5-5300U", "Proc\t : ");
+    
+    
+    
+    printf( HTOP_TEXT "\t\tNet: \u2191 195 kb/s \u2193 35 kb/s\n" RESET);
+
+
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "EliteBook 840 G2\n", "Host\t : ");
+    
+
+    
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "Intel\n", "Gpu\t : ");
+    
+    
+    
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "\n", "Usb");
+    
+    
+    printf("  ├─ ttyACM0 ── Arduino Uno\n");
+    printf("  └─ ttyUSB0 ── RPi Pico\n");
+
+
 
     printf("\n");
 
     printf(TOP_HEADER "  %-10s %-10s %-15s %-10s %-10s %-15s " RESET "\n", "PID", "PPID", "STATUS", "RES", "%MEM", "COMMAND");
     
     printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
-    //printf("  %-8s %-6s %-8s %-30s \n", "5678", "12.8%", "25.3%", "chrome");
-    //printf("  %-8s %-6s %-8s %-30s \n", "9101", "2.1%", "0.0%", "fastfetch");
+    
+    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
+    
+    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
+    
+    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
+    
+    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
     
     printf("\n");
+
+    free(get.os_name);
+    free(get.kernel);
+
+}
+
+int main() {
+    
+    print_ui();
     return 0;
 }
 

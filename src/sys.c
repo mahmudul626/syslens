@@ -21,7 +21,9 @@ void user() {
 void kernel(struct sysinfo *buf) {
     struct utsname sys;
     uname(&sys);
-    snprintf(buf->kernel, sizeof(buf->kernel), "%s", sys.release);
+    int size = strlen(sys.release) + 1;
+    buf->kernel = (char *) calloc(size, sizeof(char));
+    sprintf(buf->kernel, "%s", sys.release);
 }
 
 void getos(struct sysinfo *buf) {
@@ -65,7 +67,9 @@ void getos(struct sysinfo *buf) {
         if(name_found == 1 && version_found == 1) break;
     }
 
-    snprintf(buf->os_name, sizeof(buf->os_name), "%s %s", name, version);
+    int size = strlen(name) + strlen(version) + 2;
+    buf->os_name = (char *) calloc(size, sizeof(char));
+    sprintf(buf->os_name, "%s %s", name, version);
     fclose(file);
 }
 
