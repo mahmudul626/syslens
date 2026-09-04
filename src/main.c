@@ -10,20 +10,21 @@
 #define FETCH_VAL       "\033[38;5;255m"
 
 void print_ui() {
-    struct sysinfo get;
+    struct comp_info get;
     getos(&get);
     kernel(&get);
+    get_username(&get);
 
     printf("\n");
 
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL " %s", "OS\t :", get.os_name);
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL " %s", "OS\t :", get.sys_attr.os_name);
     
     printf("\t\t" HTOP_TEXT "Ram  " RESET);
     print_bar(5, HTOP_BAR);
     printf(HTOP_BAR " 50%%" RESET HTOP_TEXT" (3.6GiB/7.6GiB)\n" RESET);
 
 
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL " %s", "Kernel :", get.kernel);
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL " %s", "Kernel :", get.sys_attr.kernel);
     
     printf("\t" HTOP_TEXT "Swp  " RESET);
     print_bar(2, HTOP_BAR);
@@ -49,7 +50,7 @@ void print_ui() {
 
 
 
-    printf("  " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL "mahmudul@Mahmudul", "User   : ");
+    printf("  " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL "%s", "User   : ", get.sys_attr.user);
     
     
     
@@ -111,8 +112,9 @@ void print_ui() {
     
     printf("\n");
 
-    free(get.os_name);
-    free(get.kernel);
+    free(get.sys_attr.os_name);
+    free(get.sys_attr.kernel);
+    free(get.sys_attr.user);
 
 }
 

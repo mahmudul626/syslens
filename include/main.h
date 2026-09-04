@@ -22,12 +22,16 @@ extern unsigned long totalram;
 #define CYAN    "\033[1;36m"
 #define RESET   "\033[0m"
 
-struct sysinfo {
+struct sys_info {
 	char *os_name;
 	char *kernel;
 	char *shell;
 	char *user;
 	char *product;
+};
+
+struct comp_info {
+	struct sys_info sys_attr;
 };
 
 void proc();
@@ -38,9 +42,9 @@ void uptime();
 void power();
 void cpu();
 void gpu();
-void getos(struct sysinfo *buf);
-void kernel(struct sysinfo *buf);
-void user();
+void getos(struct comp_info *);
+void kernel(struct comp_info *);
+void get_username(struct comp_info *);
 void shell();
 void product_name();
 void temp();

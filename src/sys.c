@@ -1,76 +1,84 @@
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/utsname.h>
 #include "../include/main.h"
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX 64
+#endif
 
-void user() {
-    char *ptr;
-    ptr = getenv("USER");
-    if (ptr != NULL) {
+void get_username(struct comp_info *buf)
+{
+	char hostname[HOST_NAME_MAX + 1] = "unknown";
+	char *user = getenv("USER");
+	if (!buf || !user)
+		return;
 
-        FILE *file = fopen("/etc/hostname", "r");
-        if(!file) return;
-
-        char hostname[64];
-        fgets(hostname, sizeof(hostname), file);
-        hostname[strcspn(hostname, "\n")] = 0;
-
-
-        printf("User@Host   "RED":"RESET" %s@%s\n", ptr, hostname);
-        fclose(file);
-    }
+	FILE *file = fopen("/etc/hostname", "r");
+        if (file) {
+		if (fgets(hostname, sizeof(hostname), file))
+			hostname[strcspn(hostname, "\n")] = '\0';
+		fclose(file);
+	}
+	asprintf(&buf->sys_attr.user, "%s@%s", user, hostname);
 }
 
-void kernel(struct sysinfo *buf) {
-    struct utsname sys;
-    uname(&sys);
-    int size = strlen(sys.release) + 1;
-    buf->kernel = (char *) calloc(size, sizeof(char));
-    sprintf(buf->kernel, "%s", sys.release);
+void kernel(struct comp_info *buf)
+{
+	struct utsname sys;
+
+	if (!buf || uname(&sys) != 0) 
+		return;
+
+	buf->sys_attr.kernel = strdup(sys.release);
+	if (buf->sys_attr.kernel == NULL) 
+		buf->sys_attr.kernel = strdup("unknown");
 }
 
-void getos(struct sysinfo *buf) {
-    char buffer[BUFFER_SIZE];
-    int name_found = 0, version_found = 0;
-    
-    FILE *file = fopen("/etc/os-release", "r");
-    if(!file) return;
+void getos(struct comp_info *buf)
+{
+	if (!buf)
+		return;
 
-    char name[32] = "unknown";
-    char version[32] = "0";
+	char buffer[OS_NAME_MAX];
+	char name[32] = "", version[32] = "", final_name[256] = "Linux";
 
-    while (fgets(buffer, sizeof(buffer), file))
-    {
-        if (strncmp(buffer, "NAME=", 5) == 0)
-        {
-            int offset = 5;
-            if (buffer[5] == '"')
-            {
-                offset = 6;
-            }
-            
-            strcpy(name, buffer+offset);
-            name[strcspn(name, "\"\n")] = 0;
-            name_found = 1;
-        }
-        
-        if (strncmp(buffer, "VERSION_ID=", 11) == 0)
-        {
-            int offset = 11;
-            if (buffer[11] == '"')
-            {
-                offset = 12;
-            }
+    	FILE *file = fopen("/etc/os-release", "r");
+    	if (!file)
+		return;
 
-            strcpy(version, buffer+offset);
-            version[strcspn(version, "\"\n")] = 0;
-            version_found = 1;
-        } 
-        
-        if(name_found == 1 && version_found == 1) break;
-    }
+	while (fgets(buffer, sizeof(buffer), file)) {
+        	if (strncmp(buffer, "NAME=", 5) == 0) {
+            		char *str_n = buffer + 5;
+			if (*str_n == '"')
+				str_n++;
 
-    int size = strlen(name) + strlen(version) + 2;
-    buf->os_name = (char *) calloc(size, sizeof(char));
-    sprintf(buf->os_name, "%s %s", name, version);
-    fclose(file);
+			size_t len_n = strcspn(str_n, "\"\n");
+			snprintf(name, sizeof(name), "%.*s", (int)len_n, str_n);
+        	}
+
+		if (strncmp(buffer, "VERSION_ID=", 11) == 0) {
+                        char *str_v = buffer + 11;
+                        if (*str_v == '"')
+                                str_v++;
+
+                        size_t len_v = strcspn(str_v, "\"\n");
+                        snprintf(version, sizeof(version), "%.*s", (int)len_v, str_v);
+                }
+
+		if (name[0] != '\0' && version[0] != '\0')
+			break;
+	}
+	fclose(file);
+
+	if (name[0] != '\0') {
+		if (version[0] != '\0')
+			snprintf(final_name, sizeof(final_name), "%s %s", name, version);
+		else
+			snprintf(final_name, sizeof(final_name), "%s", name);
+	}
+    	buf->sys_attr.os_name = strdup(final_name);
 }
 
 void cpu() {
