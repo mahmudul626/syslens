@@ -110,26 +110,30 @@ void cpu() {
 
 
 
-void uptime() {
-    FILE *file = fopen("/proc/uptime", "r");
-    if (!file) return;
+void uptime(struct comp_info *buf)
+{
+	if (!buf)
+		return;
 
-    char buffer[BUFFER_SIZE];
-    fscanf(file, "%s", buffer);
-    float second = atof(buffer);
+    	FILE *file = fopen("/proc/uptime", "r");
+    	if (!file)
+		return;
+
+    	char buffer[BUFFER_SIZE];
+    	fscanf(file, "%s", buffer);
+    	float second = atof(buffer);
     
-    float totalmin = second / 60;
-    int hour = totalmin / 60;
-    float gap = hour * 60;
-    int minute = totalmin - gap;
+    	float totalmin = second / 60;
+    	int hour = totalmin / 60;
+    	float gap = hour * 60;
+    	int minute = totalmin - gap;
 
-    if(hour > 0) {
-        printf("Uptime      "RED":"RESET" %d hours %d mins\n", hour, minute);
-    } else {
-        printf("Uptime      "RED":"RESET" %d mins\n", minute);
-    }
+    	if (hour > 0)
+		asprintf(&buf->sys_attr.uptime, "%dh %dm", hour, minute);
+	else
+		asprintf(&buf->sys_attr.uptime, "%dm", minute);
 
-    fclose(file);
+    	fclose(file);
 }
 
 
@@ -263,30 +267,34 @@ void power() {
     }
 }
 
-void shell() {
-    FILE *file = fopen("/proc/self/status", "r");
-    if(!file) return;
+void shell(struct comp_info *buf)
+{
+	if (buf == NULL)
+		return;
 
-    char buffer[1024];
-    while (fgets(buffer, sizeof(buffer), file) != NULL)
-    {
-        if (strncmp(buffer, "PPid", 4) == 0)
-        {
-            buffer[strcspn(buffer, "\n")] = 0;
-            snprintf(buffer, sizeof(buffer), "/proc/%s/comm", buffer+6);
-            char shell_name[64];
-            FILE *shell_file = fopen(buffer, "r");
-            if(!shell_file) return;
-            fscanf(shell_file, "%s", shell_name);
-            fclose (shell_file);
-            printf("Shell       "RED":"RESET" %s\n", shell_name);
-            break;
-        }
-        
-    }
+    	FILE *file = fopen("/proc/self/status", "r");
+    	if (!file)
+		return;
 
-    fclose(file);
-    
+    	char buffer[1024];
+    	while (fgets(buffer, sizeof(buffer), file) != NULL) {
+        	if (strncmp(buffer, "PPid", 4) == 0) {
+           		buffer[strcspn(buffer, "\n")] = 0;
+            		snprintf(buffer, sizeof(buffer), "/proc/%s/comm", buffer+6);
+
+            		char shell_name[64];
+
+            		FILE *shell_file = fopen(buffer, "r");
+            		if(!shell_file)
+				return;
+
+            		fscanf(shell_file, "%s", shell_name);
+            		fclose (shell_file);
+            		buf->sys_attr.shell = strdup(shell_name);
+            		break;
+        	}    
+    	}
+	fclose(file); 
 }
 
 void product_name() {

@@ -28,6 +28,7 @@ struct sys_info {
 	char *shell;
 	char *user;
 	char *product;
+	char *uptime;
 };
 
 struct comp_info {
@@ -38,14 +39,14 @@ void proc();
 void print_bar(int length, const char *color);
 void mem();
 void load_avg();
-void uptime();
+void uptime(struct comp_info *);
 void power();
 void cpu();
 void gpu();
 void getos(struct comp_info *);
 void kernel(struct comp_info *);
 void get_username(struct comp_info *);
-void shell();
+void shell(struct comp_info *);
 void product_name();
 void temp();
 void usb();

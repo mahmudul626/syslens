@@ -14,6 +14,8 @@ void print_ui() {
     getos(&get);
     kernel(&get);
     get_username(&get);
+    uptime(&get);
+    shell(&get);
 
     printf("\n");
 
@@ -32,17 +34,17 @@ void print_ui() {
 
 
 
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL " 10 hours, 24 mins", "Uptime :");
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%-21s", "Uptime : ", get.sys_attr.uptime);
     
-    printf("\t" HTOP_TEXT "Disk " RESET);
+    printf(HTOP_TEXT "%s" RESET, "Disk ");
     print_bar(7, HTOP_BAR);
     printf(HTOP_BAR " 70%%" RESET HTOP_TEXT" (3.6GiB/7.6GiB)\n" RESET);
 
 
 
-    printf("  " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL " bash 5.2.21", "Shell  :");
+    printf("  " FETCH_KEY BOLD "%-8s" RESET FETCH_VAL "%-21s", "Shell  : ", get.sys_attr.shell);
     
-    printf("\t\t" HTOP_TEXT "Cpu  " RESET);
+    printf(HTOP_TEXT "Cpu  " RESET);
     print_bar(1, HTOP_BAR);
     printf(HTOP_BAR " 10%% " RESET HTOP_TEXT"(40°C)\n" RESET);
 
@@ -115,6 +117,8 @@ void print_ui() {
     free(get.sys_attr.os_name);
     free(get.sys_attr.kernel);
     free(get.sys_attr.user);
+    free(get.sys_attr.uptime);
+    free(get.sys_attr.shell);
 
 }
 
