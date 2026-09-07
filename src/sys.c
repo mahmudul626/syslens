@@ -137,134 +137,91 @@ void uptime(struct comp_info *buf)
 }
 
 
-void power() {
-    FILE *file = fopen("/sys/class/power_supply/BAT0/capacity", "r");
-    if (!file) return;
+void power(struct comp_info *charge, struct comp_info *predict)
+{
+	if (charge == NULL || predict == NULL)
+		return;
 
-    char capacity[24];
-    fscanf(file, "%s", capacity);
-    fclose(file);
+    	FILE *file = fopen("/sys/class/power_supply/BAT0/capacity", "r");
+    	if (!file)
+		return;
 
-    FILE *file1 = fopen("/sys/class/power_supply/BAT0/status", "r");
-    if (!file1) return;
+    	char capacity[24];
+    	fscanf(file, "%s", capacity);
+    	fclose(file);
 
-    char status[64];
-    fscanf(file1, "%s", status);
-    fclose(file1);
+	asprintf(&charge->sys_attr.b_capacity, "%s", capacity);
 
-    FILE *file2 = fopen("/sys/class/power_supply/BAT0/technology", "r");
-    if (!file2) return;
+    	FILE *file1 = fopen("/sys/class/power_supply/BAT0/status", "r");
+    	if (!file1)
+		return;
 
-    char technology[64];
-    fscanf(file2, "%s", technology);
-    fclose(file2);
+    	char status[64];
+    	fscanf(file1, "%s", status);
+    	fclose(file1);
 
-    FILE *file3 = fopen("/sys/class/power_supply/BAT0/type", "r");
-    if (!file3) return;
+    	FILE *file7 = fopen("/sys/class/power_supply/BAT0/charge_full", "r");
+    	if (!file7)
+		return;
 
-    char type[64];
-    fscanf(file3, "%s", type);
-    fclose(file3);
-
-    FILE *file4 = fopen("/sys/class/power_supply/BAT0/model_name", "r");
-    if (!file4) return;
-
-    char model_name[64];
-    fscanf(file4, "%s", model_name);
-    fclose(file4);
-
-    FILE *file5 = fopen("/sys/class/power_supply/BAT0/serial_number", "r");
-    if (!file5) return;
-
-    char serial_number[64];
-    fgets(serial_number, sizeof(serial_number), file5);
-    serial_number[strcspn(serial_number, "\n")] = 0;
-    fclose(file5);
-
-    FILE *file6 = fopen("/sys/class/power_supply/BAT0/manufacturer", "r");
-    if (!file6) return;
-
-    char manufacturer[64];
-    fscanf(file6, "%s", manufacturer);
-    fclose(file6);
-
-    FILE *file7 = fopen("/sys/class/power_supply/BAT0/charge_full", "r");
-    if (!file7) return;
-
-    int charge_full = 0;
-    char charge_capasity[120];
-    fscanf(file7, "%s", charge_capasity);
-    charge_full = atoi(charge_capasity);
-    fclose(file7);
-
-    FILE *file8 = fopen("/sys/class/power_supply/BAT0/charge_full_design", "r");
-    if (!file8) return;
-
-    int charge_full_design = 0;
-    char charge_capasity_design[120];
-    fscanf(file8, "%s", charge_capasity_design);
-    charge_full_design = atoi(charge_capasity_design);
-    fclose(file8);
-
-    int health = (charge_full * 100) / charge_full_design;
-
-    printf("Power       "RED":"RESET" ");
-    if(atoi(capacity) < 30) {
-	    printf(""RED"%s%%"RESET"", capacity);
-    } else if(atoi(capacity) < 45) {
-	    printf(""YELLOW"%s%%"RESET"", capacity);
-    } else {
-    	    printf("%s%%", capacity);
-    }
-    printf(" (%s) %s %s\n", status, technology, type);
-    printf("Health      "RED":"RESET" %d%%\n", health);
-    printf("Model       "RED":"RESET" %s %s %s\n", model_name, serial_number, manufacturer);
-
-    //charge full time and remining time predict
+    	int charge_full = 0;
+    	char charge_capasity[120];
+    	fscanf(file7, "%s", charge_capasity);
+    	charge_full = atoi(charge_capasity);
+    	fclose(file7);
     
-    FILE *file9 = fopen("/sys/class/power_supply/BAT0/charge_now", "r");
-    if (!file9) return;
+    	FILE *file9 = fopen("/sys/class/power_supply/BAT0/charge_now", "r");
+    	if (!file9)
+		return;
 
-    int charge_now = 0;
-    char charge_now_str[120];
-    fscanf(file9, "%s", charge_now_str);
-    charge_now = atoi(charge_now_str);
+    	int charge_now = 0;
+    	char charge_now_str[120];
+    	fscanf(file9, "%s", charge_now_str);
+    	charge_now = atoi(charge_now_str);
+    	fclose(file9);
 
-    fclose(file9);
-
-    FILE *file10 = fopen("/sys/class/power_supply/BAT0/current_now", "r");
-    if (!file10) return;
+    	FILE *file10 = fopen("/sys/class/power_supply/BAT0/current_now", "r");
+    	if (!file10)
+		return;
     
-    int current_now = 0;
-    char current_now_str[120];
-    fscanf(file10, "%s", current_now_str);
-    current_now = atoi(current_now_str);
+    	int current_now = 0;
+    	char current_now_str[120];
+    	fscanf(file10, "%s", current_now_str);
+    	current_now = atoi(current_now_str);
+    	fclose(file10);
 
-    fclose(file10);
-
-    if (current_now <= 0) return;
+    	if (current_now <= 0)
+		return;
     
-    int rem_charge = charge_full - charge_now;
-    float rem_time = ((float)rem_charge/ current_now) * 60;
-    float backup = ((float)charge_now / current_now) * 60;
+    	int rem_charge = charge_full - charge_now;
+    	float rem_time = ((float)rem_charge/ current_now) * 60;
+    	float backup = ((float)charge_now / current_now) * 60;
 
-    //until charge full
+    	//until charge full
     
-    int rem_total_time = (int)rem_time;
-    int rem_hour = rem_total_time / 60;
-    int rem_min = rem_total_time % 60;
+    	int rem_total_time = (int)rem_time;
+    	int rem_hour = rem_total_time / 60;
+    	int rem_min = rem_total_time % 60;
 
-    //remain charge
+    	//remain charge
 
-    int backup_time = (int)backup;
-    int backup_hour = backup_time / 60;
-    int backup_min = backup_time % 60;
+    	int backup_time = (int)backup;
+    	int backup_hour = backup_time / 60;
+    	int backup_min = backup_time % 60;
 
-    if(strcmp(status, "Charging") == 0) {
-	    printf("Until full  "RED":"RESET" %dh %dm\n", rem_hour, rem_min);
-    } else if(strcmp(status, "Discharging") == 0) {
-	    printf("Remain 	    "RED":"RESET" %dh %dm\n", backup_hour, backup_min);
-    }
+    	if (strcmp(status, "Charging") == 0) {
+		if (rem_hour > 0)
+			asprintf(&predict->sys_attr.b_ch_predict, "%dh %dm to full", rem_hour, rem_min);
+		else
+	    		asprintf(&predict->sys_attr.b_ch_predict, "%dm to full", rem_min);
+    	} else if (strcmp(status, "Discharging") == 0) {
+		if (backup_hour > 0)
+			asprintf(&predict->sys_attr.b_ch_predict, "%dh %dm left", backup_hour, backup_min);
+		else
+	    		asprintf(&predict->sys_attr.b_ch_predict, "%dm left", backup_min);
+    	} else if (strcmp(status, "full") == 0) {
+		asprintf(&predict->sys_attr.b_ch_predict, "%s", status);
+	}
 }
 
 void shell(struct comp_info *buf)

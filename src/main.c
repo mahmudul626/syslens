@@ -16,6 +16,7 @@ void print_ui() {
     get_username(&get);
     uptime(&get);
     shell(&get);
+    power(&get, &get);
 
     printf("\n");
 
@@ -66,7 +67,7 @@ void print_ui() {
 
 
 
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "93%% (34m to full)", "Bat\t : ");
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%s%% (%s)", "Bat\t : ", get.sys_attr.b_capacity, get.sys_attr.b_ch_predict);
     
     
     char task_buffer[50];
@@ -100,18 +101,18 @@ void print_ui() {
 
     printf("\n");
 
-    printf(TOP_HEADER "  %-10s %-10s %-15s %-10s %-10s %-15s " RESET "\n", "PID", "PPID", "STATUS", "RES", "%MEM", "COMMAND");
+    printf(TOP_HEADER "  %-10s %-10s %-8s %-2s %-10s %-10s %-15s " RESET "\n", "PID", "USER", "RES", "S", "%CPU", "%MEM", "COMMAND");
     
-    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
-    
-    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
-    
-    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
-    
-    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
-    
-    printf("  %-10s %-10s %-15s %-10s %-10s %-15s \n", "1234", "3214", "S (Sleeping)", "1500", "1.5%", "systemd");
-    
+    printf("  %-10s %-10s %-8s %-2s %-10s %-10s %-15s \n", "1234", "root", "15000", "S", "5.1%", "10.5%", "systemd");
+
+    printf("  %-10s %-10s %-8s %-2s %-10s %-10s %-15s \n", "1234", "root", "15000", "S", "5.1%", "10.5%", "systemd");
+
+    printf("  %-10s %-10s %-8s %-2s %-10s %-10s %-15s \n", "1234", "root", "15000", "S", "5.1%", "10.5%", "systemd");
+
+    printf("  %-10s %-10s %-8s %-2s %-10s %-10s %-15s \n", "1234", "root", "15000", "S", "5.1%", "10.5%", "systemd");
+
+    printf("  %-10s %-10s %-8s %-2s %-10s %-10s %-15s \n", "1234", "root", "15000", "S", "5.1%", "10.5%", "systemd");
+
     printf("\n");
 
     free(get.sys_attr.os_name);
@@ -119,7 +120,8 @@ void print_ui() {
     free(get.sys_attr.user);
     free(get.sys_attr.uptime);
     free(get.sys_attr.shell);
-
+    free(get.sys_attr.b_capacity);
+    free(get.sys_attr.b_ch_predict);
 }
 
 int main() {

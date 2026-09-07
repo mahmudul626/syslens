@@ -29,6 +29,8 @@ struct sys_info {
 	char *user;
 	char *product;
 	char *uptime;
+	char *b_capacity;
+	char *b_ch_predict;
 };
 
 struct comp_info {
@@ -40,7 +42,7 @@ void print_bar(int length, const char *color);
 void mem();
 void load_avg();
 void uptime(struct comp_info *);
-void power();
+void power(struct comp_info *, struct comp_info *);
 void cpu();
 void gpu();
 void getos(struct comp_info *);
