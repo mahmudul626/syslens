@@ -160,6 +160,11 @@ void power(struct comp_info *charge, struct comp_info *predict)
     	fscanf(file1, "%s", status);
     	fclose(file1);
 
+	if(strcmp(status, "Full") == 0) {
+		asprintf(&predict->sys_attr.b_ch_predict, "%s", "(full)");
+		return;
+	}
+
     	FILE *file7 = fopen("/sys/class/power_supply/BAT0/charge_full", "r");
     	if (!file7)
 		return;
@@ -190,9 +195,11 @@ void power(struct comp_info *charge, struct comp_info *predict)
     	current_now = atoi(current_now_str);
     	fclose(file10);
 
-    	if (current_now <= 0)
+    	if (current_now <= 0) {
+		asprintf(&predict->sys_attr.b_ch_predict, "%s", "(N/A)");
 		return;
-    
+	}
+
     	int rem_charge = charge_full - charge_now;
     	float rem_time = ((float)rem_charge/ current_now) * 60;
     	float backup = ((float)charge_now / current_now) * 60;
@@ -211,17 +218,15 @@ void power(struct comp_info *charge, struct comp_info *predict)
 
     	if (strcmp(status, "Charging") == 0) {
 		if (rem_hour > 0)
-			asprintf(&predict->sys_attr.b_ch_predict, "%dh %dm to full", rem_hour, rem_min);
+			asprintf(&predict->sys_attr.b_ch_predict, "(%dh %dm to full)", rem_hour, rem_min);
 		else
-	    		asprintf(&predict->sys_attr.b_ch_predict, "%dm to full", rem_min);
+	    		asprintf(&predict->sys_attr.b_ch_predict, "(%dm to full)", rem_min);
     	} else if (strcmp(status, "Discharging") == 0) {
 		if (backup_hour > 0)
-			asprintf(&predict->sys_attr.b_ch_predict, "%dh %dm left", backup_hour, backup_min);
+			asprintf(&predict->sys_attr.b_ch_predict, "(%dh %dm left)", backup_hour, backup_min);
 		else
-	    		asprintf(&predict->sys_attr.b_ch_predict, "%dm left", backup_min);
-    	} else if (strcmp(status, "full") == 0) {
-		asprintf(&predict->sys_attr.b_ch_predict, "%s", status);
-	}
+	    		asprintf(&predict->sys_attr.b_ch_predict, "(%dm left)", backup_min);
+    	}
 }
 
 void shell(struct comp_info *buf)

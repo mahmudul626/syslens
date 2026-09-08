@@ -68,7 +68,7 @@ void print_ui() {
 
 
 
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%s%% (%s)", "Bat\t : ", get.sys_attr.b_capacity, get.sys_attr.b_ch_predict);
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%s%% %-10s", "Bat\t : ", get.sys_attr.b_capacity, get.sys_attr.b_ch_predict);
     
     
     char task_buffer[50];
