@@ -278,30 +278,31 @@ void temp() {
     printf("Temp        "RED":"RESET" %d°C\n", c);
 }
 
-void gpu() {
+void gpu(struct comp_info *buf)
+{
+	if(buf == NULL)
+		return;
 
-    FILE *file = fopen("/sys/class/drm/card1/device/vendor", "r");
-    if(!file) return;
-    char vendor[64];
-    fscanf(file, "%s", vendor);
-    char gpu[64];
-    if (strcmp(vendor, "0x8086") == 0)
-    {
-        strcpy(gpu, "Intel");
-    } else if (strcmp(vendor, "0x10de") == 0)
-    {
-        strcpy(gpu, "NVIDIA");
-    } else if (strcmp(vendor, "0x1002") == 0)
-    {
-        strcpy(gpu, "AMD");
-    } else {
-        strcpy(gpu, "unknown");
-    }
-    
-    printf("GPU         "RED":"RESET" %s\n", gpu);
+    	FILE *file = fopen("/sys/class/drm/card1/device/vendor", "r");
+    	if(!file)
+		return;
 
-    fclose(file);
-    
+    	char vendor[64];
+    	fscanf(file, "%s", vendor);
+    	char gpu[64];
+
+    	if (strcmp(vendor, "0x8086") == 0) {
+        	strcpy(gpu, "Intel");
+    	} else if (strcmp(vendor, "0x10de") == 0) {
+        	strcpy(gpu, "NVIDIA");
+   	} else if (strcmp(vendor, "0x1002") == 0) {
+        	strcpy(gpu, "AMD");
+    	} else {
+        	strcpy(gpu, "unknown");
+    	}
+
+    	fclose(file);
+	buf->sys_attr.gpu = strdup(gpu);
 }
 
 void usb() {

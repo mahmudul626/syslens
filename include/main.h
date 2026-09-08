@@ -27,7 +27,7 @@ struct sys_info {
 	char *kernel;
 	char *shell;
 	char *user;
-	char *product;
+	char *gpu;
 	char *uptime;
 	char *b_capacity;
 	char *b_ch_predict;
@@ -44,7 +44,7 @@ void load_avg();
 void uptime(struct comp_info *);
 void power(struct comp_info *, struct comp_info *);
 void cpu();
-void gpu();
+void gpu(struct comp_info *);
 void getos(struct comp_info *);
 void kernel(struct comp_info *);
 void get_username(struct comp_info *);

@@ -17,6 +17,7 @@ void print_ui() {
     uptime(&get);
     shell(&get);
     power(&get, &get);
+    gpu(&get);
 
     printf("\n");
 
@@ -87,7 +88,7 @@ void print_ui() {
     
 
     
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "Intel\n", "Gpu\t : ");
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%s\n", "Gpu\t : ", get.sys_attr.gpu);
     
     
     
@@ -122,6 +123,7 @@ void print_ui() {
     free(get.sys_attr.shell);
     free(get.sys_attr.b_capacity);
     free(get.sys_attr.b_ch_predict);
+    free(get.sys_attr.gpu);
 }
 
 int main() {
