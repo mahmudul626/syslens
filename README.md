@@ -1,1 +1,1 @@
-!(wip)[https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fforum.asana.com%2Ft%2Ftgif-share-your-quarantricks-to-stay-productive%2F80729&ved=0CBYQjRxqFwoTCNCJlvve5pYDFQAAAAAdAAAAABA4&opi=89978449]
+![wip](https://us1.discourse-cdn.com/asana/original/3X/b/9/b94982020a330f1604e94b2e92ea1380aeb4841c.gif)
