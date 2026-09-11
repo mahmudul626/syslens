@@ -289,25 +289,32 @@ void gpu(struct comp_info *buf)
 	if(buf == NULL)
 		return;
 
-    	FILE *file = fopen("/sys/class/drm/card1/device/vendor", "r");
+    	FILE *file = fopen("/sys/class/drm/card1/device/device", "r");
     	if(!file)
 		return;
 
-    	char vendor[64];
-    	fscanf(file, "%s", vendor);
-    	char gpu[64];
+	char gpu[1024] = "unknown";
+    	char device_id_str[64];
+	unsigned int device_id;
 
-    	if (strcmp(vendor, "0x8086") == 0) {
-        	strcpy(gpu, "Intel");
-    	} else if (strcmp(vendor, "0x10de") == 0) {
-        	strcpy(gpu, "NVIDIA");
-   	} else if (strcmp(vendor, "0x1002") == 0) {
-        	strcpy(gpu, "AMD");
-    	} else {
-        	strcpy(gpu, "unknown");
-    	}
+    	fscanf(file, "0x%x", &device_id);
+	fclose(file);
 
-    	fclose(file);
+	snprintf(device_id_str, sizeof(device_id_str), "\t%x", device_id);
+
+	char buffer[1024];
+	FILE *PCI_FILE = fopen("/usr/share/hwdata/pci.ids", "r");
+	if (!PCI_FILE)
+		return;
+
+	while(fgets(buffer, sizeof(buffer), PCI_FILE) != NULL) {
+		if (strncmp(buffer, device_id_str, strlen(device_id_str)) == 0) {
+			snprintf(gpu, sizeof(gpu), "%s", buffer+7);
+			break;
+		}
+	}
+
+	fclose(PCI_FILE);
 	buf->sys_attr.gpu = strdup(gpu);
 }
 
