@@ -31,6 +31,7 @@ struct sys_info {
 	char *uptime;
 	char *b_capacity;
 	char *b_ch_predict;
+	char *temp;
 };
 
 struct comp_info {
@@ -50,7 +51,7 @@ void kernel(struct comp_info *);
 void get_username(struct comp_info *);
 void shell(struct comp_info *);
 void product_name();
-void temp();
+void temp(struct comp_info *);
 void usb();
 void cpu_per();
 

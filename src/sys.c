@@ -270,17 +270,18 @@ void product_name() {
     printf("Host        "RED":"RESET" %s\n", name);
 }
 
-void temp() {
-
+void temp(struct comp_info *buf)
+{
     int mcls = 0;
     FILE *file = fopen("/sys/class/hwmon/hwmon4/temp1_input", "r");
-    if(!file) return;
+    if (!file)
+	    return;
 
     fscanf(file, "%d", &mcls);
     fclose(file);
 
     int c = mcls / 1000;
-    printf("Temp        "RED":"RESET" %d°C\n", c);
+    asprintf(&buf->sys_attr.temp, "%d°C", c);
 }
 
 void gpu(struct comp_info *buf)

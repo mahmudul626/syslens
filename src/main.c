@@ -18,6 +18,7 @@ void print_ui() {
     shell(&get);
     power(&get, &get);
     gpu(&get);
+    temp(&get);
 
     printf("\n");
 
@@ -48,7 +49,7 @@ void print_ui() {
     
     printf(HTOP_TEXT "Cpu  " RESET);
     print_bar(1, HTOP_BAR);
-    printf(HTOP_BAR " 10%% " RESET HTOP_TEXT"(40°C)\n" RESET);
+    printf(HTOP_BAR " 10%% " RESET HTOP_TEXT"(%s)\n" RESET, get.sys_attr.temp);
 
 
 
@@ -124,6 +125,7 @@ void print_ui() {
     free(get.sys_attr.b_capacity);
     free(get.sys_attr.b_ch_predict);
     free(get.sys_attr.gpu);
+    free(get.sys_attr.temp);
 }
 
 int main() {
