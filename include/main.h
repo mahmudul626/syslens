@@ -32,6 +32,8 @@ struct sys_info {
 	char *b_capacity;
 	char *b_ch_predict;
 	char *temp;
+	char *product;
+	char *cpu;
 };
 
 struct comp_info {
@@ -44,13 +46,13 @@ void mem();
 void load_avg();
 void uptime(struct comp_info *);
 void power(struct comp_info *, struct comp_info *);
-void cpu();
+void cpu(struct comp_info *);
 void gpu(struct comp_info *);
 void getos(struct comp_info *);
 void kernel(struct comp_info *);
 void get_username(struct comp_info *);
 void shell(struct comp_info *);
-void product_name();
+void product_name(struct comp_info *);
 void temp(struct comp_info *);
 void usb();
 void cpu_per();

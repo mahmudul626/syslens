@@ -19,6 +19,8 @@ void print_ui() {
     power(&get, &get);
     gpu(&get);
     temp(&get);
+    product_name(&get);
+    cpu(&get);
 
     printf("\n");
 
@@ -78,18 +80,18 @@ void print_ui() {
     
     
     
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "i5-5300U", "Proc\t : ");
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%-21s", "Gpu\t : ", get.sys_attr.gpu);
     
     
     
-    printf( HTOP_TEXT "\t\tNet: \u2191 195 kb/s \u2193 35 kb/s\n" RESET);
+    printf( HTOP_TEXT "Net: \u2191 195 kb/s \u2193 35 kb/s\n" RESET);
 
 
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "EliteBook 840 G2\n", "Host\t : ");
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%s\n", "Host\t : ", get.sys_attr.product);
     
 
     
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%s\n", "Gpu\t : ", get.sys_attr.gpu);
+    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%s\n", "Proc\t : ", get.sys_attr.cpu);
     
     
     
@@ -126,6 +128,8 @@ void print_ui() {
     free(get.sys_attr.b_ch_predict);
     free(get.sys_attr.gpu);
     free(get.sys_attr.temp);
+    free(get.sys_attr.product);
+    free(get.sys_attr.cpu);
 }
 
 int main() {

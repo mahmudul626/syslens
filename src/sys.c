@@ -81,30 +81,30 @@ void getos(struct comp_info *buf)
     	buf->sys_attr.os_name = strdup(final_name);
 }
 
-void cpu() {
-    char buffer[BUFFER_SIZE];
-    char terget[] = "model name";
-    FILE *file = fopen("/proc/cpuinfo", "r");
-    if(!file) return;
+void cpu(struct comp_info *buf)
+{
+	if (buf == NULL)
+		return;
 
-    while (fgets(buffer, sizeof(buffer), file))
-    {
-        if (strstr(buffer, terget))
-        {
+    	char buffer[BUFFER_SIZE];
+    	char terget[] = "model name";
+    	FILE *file = fopen("/proc/cpuinfo", "r");
+    	if (!file)
+		return;
 
-            char *ptr = strchr(buffer, ':');
-            if (ptr != NULL) {
-                ptr++; 
-                while (*ptr == ' ') ptr++;
-                ptr[strcspn(ptr, "\r\n")] = 0;
-                printf("CPU         "RED":"RESET" %s\n", ptr);
-            }
-            break;
-        }
-        
-    }
-
-    fclose(file);
+    	while (fgets(buffer, sizeof(buffer), file)) {
+        	if (strstr(buffer, terget)) {
+            		char *ptr = strchr(buffer, ':');
+            		if (ptr != NULL) {
+                		ptr++; 
+                		while (*ptr == ' ') ptr++;
+                		ptr[strcspn(ptr, "\r\n")] = 0;
+                		buf->sys_attr.cpu = strdup(ptr);
+            		}
+            	break;
+        	}    
+    	}
+    	fclose(file);
 }
 
 
@@ -259,29 +259,34 @@ void shell(struct comp_info *buf)
 	fclose(file); 
 }
 
-void product_name() {
-    FILE *file = fopen("/sys/devices/virtual/dmi/id/product_name", "r");
-    if(!file) return;
+void product_name(struct comp_info *buf)
+{
+	if (buf == NULL)
+		return;
+    	FILE *file = fopen("/sys/devices/virtual/dmi/id/product_name", "r");
+    	if (!file)
+		return;
 
-    char name[512];
-    fgets(name, sizeof(name), file);
-    name[strcspn(name, "\n")] = 0;
-    fclose(file);
-    printf("Host        "RED":"RESET" %s\n", name);
+    	char name[512];
+    	fgets(name, sizeof(name), file);
+    	name[strcspn(name, "\n")] = 0;
+    	fclose(file);
+    	buf->sys_attr.product = strdup(name);
 }
 
 void temp(struct comp_info *buf)
 {
-    int mcls = 0;
-    FILE *file = fopen("/sys/class/hwmon/hwmon4/temp1_input", "r");
-    if (!file)
-	    return;
 
-    fscanf(file, "%d", &mcls);
-    fclose(file);
+    	int mcls = 0;
+    	FILE *file = fopen("/sys/class/hwmon/hwmon4/temp1_input", "r");
+    	if (!file)
+	    	return;
 
-    int c = mcls / 1000;
-    asprintf(&buf->sys_attr.temp, "%d°C", c);
+    	fscanf(file, "%d", &mcls);
+    	fclose(file);
+
+    	int c = mcls / 1000;
+    	asprintf(&buf->sys_attr.temp, "%d°C", c);
 }
 
 void gpu(struct comp_info *buf)
@@ -310,6 +315,7 @@ void gpu(struct comp_info *buf)
 	while(fgets(buffer, sizeof(buffer), PCI_FILE) != NULL) {
 		if (strncmp(buffer, device_id_str, strlen(device_id_str)) == 0) {
 			snprintf(gpu, sizeof(gpu), "%s", buffer+7);
+			gpu[strcspn(gpu, "\n")] = '\0';
 			break;
 		}
 	}
