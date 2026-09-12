@@ -10,7 +10,9 @@
 #define FETCH_VAL       "\033[38;5;255m"
 
 void print_ui() {
-    struct comp_info get;
+    struct comp_info get, *get_usb[80];
+    int usb_count = 0;
+    usb(get_usb, &usb_count);
     getos(&get);
     kernel(&get);
     get_username(&get);
@@ -94,12 +96,20 @@ void print_ui() {
     printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "%s\n", "Proc\t : ", get.sys_attr.cpu);
     
     
+    if(usb_count > 0)
+	    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "\n", "Usb");
     
-    printf("  " FETCH_KEY BOLD "%s" RESET FETCH_VAL "\n", "Usb");
     
-    
-    printf("  ├─ ttyACM0 ── Arduino Uno\n");
-    printf("  └─ ttyUSB0 ── RPi Pico\n");
+    if (get_usb) {
+        for (int i = 0; i < usb_count; i++) {
+            if (get_usb[i] && get_usb[i]->sys_attr.usb) {
+		     if(usb_count > 1 && i != 1)
+			    printf("  ├%s", get_usb[i]->sys_attr.usb);
+		     else
+			    printf("  └%s", get_usb[i]->sys_attr.usb);
+            }
+        }
+    }
 
 
 
@@ -118,6 +128,16 @@ void print_ui() {
     printf("  %-10s %-10s %-8s %-2s %-10s %-10s %-15s \n", "1234", "root", "15000", "S", "5.1%", "10.5%", "systemd");
 
     printf("\n");
+
+
+    if (get_usb) {
+        for (int i = 0; i < usb_count; i++) {
+            if (get_usb[i]) {
+                free(get_usb[i]->sys_attr.usb);
+                free(get_usb[i]);
+            }
+        }
+    }
 
     free(get.sys_attr.os_name);
     free(get.sys_attr.kernel);

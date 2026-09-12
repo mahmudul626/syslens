@@ -34,6 +34,7 @@ struct sys_info {
 	char *temp;
 	char *product;
 	char *cpu;
+	char *usb;
 };
 
 struct comp_info {
@@ -54,7 +55,7 @@ void get_username(struct comp_info *);
 void shell(struct comp_info *);
 void product_name(struct comp_info *);
 void temp(struct comp_info *);
-void usb();
+void usb(struct comp_info **, int *);
 void cpu_per();
 
 #endif

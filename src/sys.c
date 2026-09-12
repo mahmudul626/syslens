@@ -328,7 +328,7 @@ void gpu(struct comp_info *buf)
 	buf->sys_attr.gpu = strdup(gpu);
 }
 
-void usb()
+void usb(struct comp_info **buf, int *usb_count)
 {
 	DIR *d = opendir("/sys/bus/usb/devices/");
 	if (!d)
@@ -338,50 +338,95 @@ void usb()
 	int count = 0;
 
 	while ((a = readdir(d)) != NULL) {
-		if (isdigit(a->d_name[0])) {
-			char path[512];
-			snprintf(path, sizeof(path),
-				 "/sys/bus/usb/devices/%s/removable",
-				 a->d_name);
+		if (!isdigit(a->d_name[0]))
+			continue;
 
-			FILE *file = fopen(path, "r");
-			if (!file) {
-				continue;
-			}
+		char path[512];
+		snprintf(path, sizeof(path),
+			 "/sys/bus/usb/devices/%s/removable", a->d_name);
 
-			char attachment[64];
-			fscanf(file, "%s", attachment);
+		FILE *file = fopen(path, "r");
+		if (!file)
+			continue;
 
-			if (strcmp(attachment, "removable") == 0) {
-				if (count == 0) {
-					printf("USB         " RED ":" RESET
-					       " ");
+		char attachment[64] = { 0 };
+		fscanf(file, "%63s", attachment);
+		fclose(file);
+
+		if (strcmp(attachment, "removable") != 0)
+			continue;
+
+		char name_path[512];
+		snprintf(name_path, sizeof(name_path),
+			 "/sys/bus/usb/devices/%s/product", a->d_name);
+
+		FILE *name_file = fopen(name_path, "r");
+		if (!name_file)
+			continue;
+
+		char product_name[64] = { 0 };
+		if (fgets(product_name, sizeof(product_name), name_file)) {
+			product_name[strcspn(product_name, "\r\n")] = 0;
+		}
+		fclose(name_file);
+
+		/*------------- TTY Serial Port Check ------------*/
+		char tty_dev[256] = "N/E";
+		DIR *tty_d = opendir("/sys/class/tty");
+
+		if (tty_d) {
+			struct dirent *entry;
+			while ((entry = readdir(tty_d)) != NULL) {
+				if (strstr(entry->d_name, "ttyACM") ||
+				    strstr(entry->d_name, "ttyUSB")) {
+					char tty_path[1024];
+					snprintf(
+						tty_path, sizeof(tty_path),
+						"/sys/class/tty/%s/device/../product",
+						entry->d_name);
+
+					FILE *tty_file = fopen(tty_path, "r");
+					if (tty_file) {
+						char tty_product[256] = { 0 };
+						if (fgets(tty_product,
+							  sizeof(tty_product),
+							  tty_file)) {
+							tty_product[strcspn(
+								tty_product,
+								"\r\n")] = 0;
+
+							if (strcmp(product_name,
+								   tty_product) ==
+							    0) {
+								snprintf(
+									tty_dev,
+									sizeof(tty_dev),
+									"%s",
+									entry->d_name);
+								fclose(tty_file);
+								break;
+							}
+						}
+						fclose(tty_file);
+					}
 				}
-				char name_path[512];
-				snprintf(name_path, sizeof(name_path),
-					 "/sys/bus/usb/devices/%s/product",
-					 a->d_name);
-				count++;
-
-				FILE *name_file = fopen(name_path, "r");
-				if (!name_file)
-					continue;
-
-				char product_name[64];
-				fgets(product_name, sizeof(product_name),
-				      name_file);
-				product_name[strcspn(product_name, "\n")] = 0;
-				if (count > 1) {
-					printf("| %s", product_name);
-				} else {
-					printf("%s ", product_name);
-				}
-				fclose(name_file);
 			}
-			fclose(file);
+			closedir(tty_d);
+		}
+		/*-------------- End TTY ----------------------*/
+
+		char final_name[1024];
+
+		snprintf(final_name, sizeof(final_name), "─ %s ── %s\n",
+			 tty_dev, product_name);
+
+		buf[count] = malloc(sizeof(struct comp_info));
+		if (buf[count]) {
+			buf[count]->sys_attr.usb = strdup(final_name);
+			count++;
 		}
 	}
-	if (count > 0)
-		printf("\n");
+
 	closedir(d);
+	*usb_count = count;
 }
