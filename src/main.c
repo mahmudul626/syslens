@@ -111,8 +111,11 @@ void print_ui() {
 
     printf(TOP_HEADER "  %-10s %-10s %-15s %-10s %-10s %-10s " RESET "\n", "PID", "USER", "STATUS", "RES", "%MEM", "COMMAND");
 
+    int ps = 5;
+    if (pindex < ps)
+	    ps = pindex;
 
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < ps; i++) {
 
             	float pmem = ((float)getplist[i].proc_attr.vmrss / totalram) * 100;
 
