@@ -1,12 +1,12 @@
-# SysLens 🔍
+<img src="demo/logo.png" alt="pecha logo" style="float: left; margin-right: 15px;" width="950">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)]()
-[![GitHub stars](https://img.shields.io/github/stars/mahmudul626/syslens.svg)](https://github.com/mahmudul626/syslens/stargazers)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/version-2.0.0-blue.svg" alt="Version">
+  <a href="https://github.com/mahmudul626/syslens/stargazers"><img src="https://img.shields.io/github/stars/mahmudul626/syslens.svg" alt="GitHub stars"></a>
+</p>
 
-> *"It might have a messy codebase, but it does its job flawlessly. If it works for me, I think you'll find it useful too!"*
-
-SysLens is a lightweight, terminal-based system information utility written in C. It leverages Linux's virtual filesystems and system files to produce a real-time snapshot of system health, hardware specifications, and resource usage.
+<strong>Pecha</strong> is a lightweight, terminal-based system information utility. It leverages Linux's virtual filesystems to produce a real-time snapshot of system information, resource usage and top resource-hungry processes.
 
 ## 🚀 Features
 
